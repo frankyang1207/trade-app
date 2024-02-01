@@ -2,7 +2,7 @@ import React, {useState, useEffect } from 'react';
 import { Box, Heading, VStack } from "@chakra-ui/react";
 import Card from "./card";
 
-const ProductsSection = ({ state, onUpdateProduct }) => {
+const ProductsSection = ({ refreshSwitch, onUpdateProduct }) => {
   const [products, setProducts] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
 
@@ -26,7 +26,7 @@ const ProductsSection = ({ state, onUpdateProduct }) => {
       }
     };
       fetchData();
-  }, [state]);
+  }, [refreshSwitch]);
 
  
   return (

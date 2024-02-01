@@ -20,7 +20,7 @@ function App() {
       <ChakraProvider>
         <AuthProvider>
           <Header onAddProduct={handleAddProduct} />
-          <ProductsSection state={refreshProductSection} onUpdateProduct={handleAddProduct} />
+          <ProductsSection refreshSwitch={refreshProductSection} onUpdateProduct={handleAddProduct} />
           <Footer />
         </AuthProvider>
       </ChakraProvider>

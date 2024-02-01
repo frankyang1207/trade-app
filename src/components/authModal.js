@@ -149,10 +149,12 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
     const fetchData = async () => {
       const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken};
       const body = JSON.stringify({ 
+        
         'user_email': formik.values.email, 
         'user_first_name': formik.values.firstName,
         'user_last_name': formik.values.lastName,
-        'user_phone': formik.values.phoneNumber
+        'user_phone': formik.values.phoneNumber,
+        'user_id': userId
       });
       await handleFetch('http://localhost:9000/user', 'PUT', headers, body);
     };
