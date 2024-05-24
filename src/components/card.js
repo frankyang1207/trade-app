@@ -1,60 +1,95 @@
 import { Heading, HStack, Image, Text, VStack, Button, useToast } from "@chakra-ui/react";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuthContext } from '../context/authContext';
 import ProductModal from "./productModal";
-import handleFetch from "../utils/handleFetch";
+import axios from "axios";
 
-const Card = ({ id, name, price, description, owner, imageSrc, onCardChange }) => {
+const Card = (props) => {
+  const { product, reRenderProducts, changePage } = props;
   const [isModifyModalOpen, setModifyModalOpen] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
   const { userId, userRole, accessToken } = useAuthContext();
-
-  const openModifyModal = () => setModifyModalOpen(true);
   const closeModifyModal = () => {
     setModifyModalOpen(false);
-    onCardChange();  // rerender product section 
+    reRenderProducts();  
   }
   const toast = useToast();
+  
+  const handleDetailPage = () => {
+    localStorage.setItem('product', JSON.stringify(product));
+    changePage('productDetailPage');
+  }
+
+  const handleModify = (e) => {
+    // prevent parent event of going to detail page
+    e.stopPropagation();
+    setModifyModalOpen(true);
+  }
 
    // handle product removal
-   useEffect(() => {
-    if (isFetching) {
-      const url = 'http://localhost:9000/product';
-      const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken  };
-      const method = 'DELETE';
-      const body = JSON.stringify({ 'product_id': id });
-      handleFetch(url, headers, method, body, onCardChange, toast);
-      setIsFetching(false);
+  const handleRemoval = async (e) => {
+    e.stopPropagation();
+    const url = 'http://localhost:9000/product';
+    const headers = { 'Authorization': 'Bearer ' + accessToken  };
+    const data = ({ 'product_id': product.product_id });
+    try {
+      const response = await axios.delete(url, {headers, data});
+      if (response && response.status && response.status === 200) {
+        toast({
+          title: 'Success',
+          description: response.data.message,
+          status: 'success',
+          position: 'top',
+          duration: 2000,
+          isClosable: true,
+        });
+        reRenderProducts();
+      } else {
+        toast({
+          title: 'Failed',
+          description: response.data.message,
+          status: 'error',
+          position: 'top',
+          duration: 2000,
+          isClosable: true,
+        });
+      }
+    } catch(error) {
+      console.log(error)
     }
-  }, [isFetching]);
+  }
 
   return (
-    <div style={{backgroundColor: "white", borderRadius: "10px", borderWidth: '3px', borderColor: '#E2E8F0'}}>
-      <Image src={require("../images/cardboard-box-taped-up.jpg")} borderRadius="10px"></Image>
-      <VStack spacing="2" color="black" margin="20px" align="start" height="100px">
+    <div 
+      style={{backgroundColor: "white", borderRadius: "10px", borderWidth: '3px', borderColor: '#E2E8F0', cursor: 'pointer'}}
+      onClick={handleDetailPage}
+    >
+      <Image src={product.product_image_link} padding="10px 10px 0px 10px" borderRadius="10px" width="350px" height="400px"></Image>
+      <VStack spacing="2" color="black" margin="20px" align="start" height="30px">
         <HStack justifyContent='space-between' alignItems='center' width='100%'>
-          <Heading size="sm" >{name}</Heading>
-          <Text>${price}</Text>
+          <Heading size="sm" >{product.product_name}</Heading>
+          <Text>${product.product_price}</Text>
         </HStack>
-        <Text noOfLines={3}>{description}</Text>
       </VStack>
-      <HStack alignItems="center" justifyContent="center" margin="20px">
-        { ((owner === userId) || (userRole === "ADMIN")) ?
-          <>
-            <Button colorScheme='teal' variant='solid' onClick={openModifyModal} >Modify</Button>    
-            <Button colorScheme='teal' variant='solid' onClick={()=>setIsFetching(true)} >Remove</Button>
-          </> :
-          <Button colorScheme='teal' variant='solid'>Purchase</Button>
-        }
-      </HStack>
+      {((product.product_owner === userId) || (userRole === "ADMIN")) ?
+        <HStack alignItems="center" justifyContent="center" margin="20px">
+          <Button colorScheme='teal' variant='solid' onClick={handleModify} >Modify</Button>    
+          <Button colorScheme='teal' variant='solid' onClick={handleRemoval} >Remove</Button>
+        </HStack>
+        : 
+        null
+      }
       <ProductModal 
         isOpen={isModifyModalOpen}
         onClose={closeModifyModal}
         mode='modify'
-        id={id}
-        name={name}
-        price={price}
-        description={description}
+        id={product.product_id}
+        imageSrc={product.product_image_link}
+        name={product.product_name}
+        price={product.product_price}
+        quantity={product.product_quantity}
+        forMale={product.product_for_male}
+        forFemale={product.product_for_female}
+        description={product.product_description}
       />
     </div>
     )

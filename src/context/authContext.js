@@ -2,13 +2,16 @@ import {createContext, useContext, useState} from 'react';
 
 const AuthContext = createContext(undefined);
 
+// if user refresh page, state would be lost, to stay login local memory is used
 export const AuthProvider = ({ children }) => {
+  const localUserData = localStorage.getItem('user-info') ? JSON.parse(localStorage.getItem('user-info')) : ''
   const [state, setState] = useState({
-    isLoggedin: false,
-    refreshToken: '',
-    accessToken: '',
-    userId: undefined,
-    userRole: ''
+    isLoggedin: localUserData && localUserData.userId ? true : false,
+    refreshToken: localUserData && localUserData.refreshToken ? localUserData.refreshToken : '',
+    accessToken: localUserData && localUserData.accessToken ? localUserData.accessToken : '',
+    userId: localUserData && localUserData.userId ? localUserData.userId : '',
+    userRole: localUserData && localUserData.userRole ? localUserData.userRole : '',
+    userImageLink: localUserData && localUserData.userImageLink ? localUserData.userImageLink : '',
   });
 
   return (
@@ -16,13 +19,24 @@ export const AuthProvider = ({ children }) => {
       value={{
         state,
         ...state,
-        onLogin: (refreshToken, accessToken, userId, userRole) => setState({
+        onLogin: (props) => setState({
           isLoggedin: true,
-          refreshToken,
-          accessToken,
-          userId,
-          userRole }),
-        onLogout: () => setState({ isLoggedin: false, refreshToken: '', accessToken: '', userId: undefined, userRole: '' }),
+          refreshToken: props.refreshToken,
+          accessToken: props.accessToken,
+          userId: props.userId,
+          userRole: props.userRole,
+          userImageLink: props.userImageLink,
+        }),
+        onLogout: () => {
+          localStorage.removeItem('user-info');
+          setState({ 
+          isLoggedin: false, 
+          refreshToken: '', 
+          accessToken: '', 
+          userId: undefined, 
+          userRole: '', 
+          userImageLink:'' 
+        })}
       }}
     >
       {children}

@@ -16,31 +16,40 @@ import {
   HStack,
   Flex,
   useToast, 
+  Link,
+  Text,
+  Spacer
 } from '@chakra-ui/react';
 import * as Yup from 'yup';
 import { useAuthContext } from '../context/authContext';
 
 // this component handles the modal for account related actions
-const AuthModal = ({ isOpen, onClose, mode }) => {
-  const toast = useToast()
+const AuthModal = ({ isOpen, onClose, authMode }) => {
+  const toast = useToast();
+  const [mode, setMode] = useState(authMode);
   const [isFetching, setIsFetching] = useState(false);
-  const { isLoggedin, userId, onLogin, accessToken } = useAuthContext();
+  const { onLogin } = useAuthContext();
   const formik = useFormik({
     initialValues: {
       firstName:'',
       lastName:'',
       phoneNumber:'',
+      postalCode:'',
       email:'',
       password:'',
     },
     onSubmit: () => {
-      setIsFetching(true);
+      if (mode === 'login') {
+        loginAccount();
+      } else if (mode === 'register') {
+        registerAccount();
+      }
     },
-    // if it is profile modal, password is not required
+    // postal code is not required during login
     validationSchema: Yup.object({
       email: Yup.string().email('Invalid email address').required('Required'),
-      password: mode === 'profile' ? Yup.string() : Yup.string().required('Required')
-
+      postalCode: mode === 'login' ? Yup.string() : Yup.string().required('Required'),
+      password: Yup.string().required('Required')
     })
   });
 
@@ -58,8 +67,19 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
           duration: 2000,
           isClosable: true,
         })
-        if (mode === 'login') {
-          onLogin(resObj.refresh_token, resObj.access_token, resObj.user_id, resObj.user_role);
+        if (mode === 'login' || mode === 'register') {
+          
+          const userInfo = {
+            refreshToken: resObj.refresh_token, 
+            accessToken: resObj.access_token, 
+            userId: resObj.user_id, 
+            userRole: resObj.user_role, 
+            userImageLink: resObj.user_image_link
+          }
+          onLogin(
+            userInfo
+          );
+          localStorage.setItem('user-info', JSON.stringify(userInfo));
         }
         formik.resetForm();
         onClose();
@@ -80,97 +100,46 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
   };
 
   // fetch for login
-  useEffect(() => {
-    const fetchData = async () => {
-      const headers = { 'Content-Type': 'application/json' };
-      const body = JSON.stringify({ 
-        'user_email': formik.values.email, 
-        'user_password': formik.values.password 
-      });
-      await handleFetch('http://localhost:9000/login', 'POST', headers, body);
-    };
-
-    if (isFetching && mode === 'login') {
-      fetchData();
-      setIsFetching(false);
-    }
-  }, [isFetching]);
+  const loginAccount = async () => {
+    const headers = { 'Content-Type': 'application/json' };
+    const body = JSON.stringify({ 
+      'user_email': formik.values.email, 
+      'user_password': formik.values.password 
+    });
+    await handleFetch('http://localhost:9000/login', 'POST', headers, body);
+  };
 
   // fetch for register
-  useEffect(() => {
-    const fetchData = async () => {
-      const headers = { 'Content-Type': 'application/json'};
-      const body = JSON.stringify({ 
-        'user_email': formik.values.email, 
-        'user_password': formik.values.password,
-        'user_first_name': formik.values.firstName,
-        'user_last_name': formik.values.lastName,
-        'user_phone': formik.values.phoneNumber
-      });
-      await handleFetch('http://localhost:9000/user', 'POST', headers, body);
-    };
+  const registerAccount = async () => {
+    const headers = { 'Content-Type': 'application/json'};
+    const body = JSON.stringify({ 
+      'user_email': formik.values.email, 
+      'user_password': formik.values.password,
+      'user_first_name': formik.values.firstName,
+      'user_last_name': formik.values.lastName,
+      'user_phone': formik.values.phoneNumber,
+      'user_postal_code': formik.values.postalCode,
+    });
+    await handleFetch('http://localhost:9000/user', 'POST', headers, body);
+  };
 
-    if (isFetching && mode === 'register') {
-      fetchData();
-      setIsFetching(false);
-    }
-  }, [isFetching]);
+  const handleSwitchMode = (mode) => {
+    setMode(mode);
+  }
 
-  // fetch for get profile
-  useEffect(() => {
-    const fetchData = async () => {
-      const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken };
-      const method = 'GET';
-      try {
-        const response = await fetch(`http://localhost:9000/user/${userId}`, {method, headers});
-        if (response.ok) {
-          const resObj = await response.json();
-          formik.setValues({
-            ...formik.values,
-            email: resObj.user_email,
-            firstName: resObj.user_first_name,
-            lastName: resObj.user_last_name,
-            phoneNumber: resObj.user_phone,
-          });
-        }
-      }
-      catch (error) {
-        console.log(error);
-      }
-    };
+  const handleClose = () => {
+    setMode(authMode);
+    onClose();
+  }
 
-    if (mode === 'profile' && isLoggedin) {
-      fetchData();
-    }
-  }, [isOpen]);
-
-  // fetch for update profile
-  useEffect(() => {
-    const fetchData = async () => {
-      const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken};
-      const body = JSON.stringify({ 
-        
-        'user_email': formik.values.email, 
-        'user_first_name': formik.values.firstName,
-        'user_last_name': formik.values.lastName,
-        'user_phone': formik.values.phoneNumber,
-        'user_id': userId
-      });
-      await handleFetch('http://localhost:9000/user', 'PUT', headers, body);
-    };
-    if (isFetching && mode === 'profile') {
-      fetchData();
-      setIsFetching(false);
-    }
-  }, [isFetching]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size='md'>
+    <Modal isOpen={isOpen} onClose={handleClose} size='md'>
       <ModalOverlay />
       <ModalContent>
         
       <form onSubmit ={formik.handleSubmit}>
-        <ModalHeader>{mode === 'login' ? 'Login' : mode === 'register' ? 'Register' : 'Profile'}</ModalHeader>
+        <ModalHeader>{mode === 'login' ? 'Login' : 'Register'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <FormControl isInvalid={formik.touched.email && formik.errors.email}>
@@ -210,6 +179,15 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
               {...formik.getFieldProps('phoneNumber')}
             />
           </FormControl>
+          <FormControl mt={4} isInvalid={formik.touched.postalCode && formik.errors.postalCode}>
+            <FormLabel>Postal Code</FormLabel>
+            <Input
+              type='text'
+              placeholder='Enter your postal code'
+              {...formik.getFieldProps('postalCode')}
+            />
+            <FormErrorMessage>{formik.errors.postalCode}</FormErrorMessage>
+          </FormControl>
           </>}
           {mode !== 'profile' &&
           <>
@@ -225,7 +203,22 @@ const AuthModal = ({ isOpen, onClose, mode }) => {
           </>}
         </ModalBody>
         <ModalFooter>
-          <HStack spacing={4}>
+          <HStack spacing={4} w='100%'>
+            {
+            mode === 'login' ? 
+            <Text m={1}>{'New customer? '}
+              <Link color='teal.500' onClick={() => handleSwitchMode('register')}>
+                Register
+              </Link>
+            </Text>
+            : 
+            <Text m={1}>{'Already registered? '}
+              <Link color='teal.500' onClick={() => handleSwitchMode('login')}>
+                Login
+              </Link>
+            </Text>
+            }
+            <Spacer/>
             <Button type='submit' colorScheme='teal' isDisabled={isFetching} >Submit</Button>
           </HStack>
         </ModalFooter>

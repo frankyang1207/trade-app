@@ -1,0 +1,31 @@
+.accordion {
+    padding: 0;
+}
+
+.accordion li {
+    list-style: none;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 30px;
+    border-bottom: 1px solid;
+}  
+
+.accordion li:last-child{
+    border: 0;
+}
+
+li div label {
+    margin-bottom: 20px;
+    font-size: 19px
+}
+
+.inactive {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.active{
+    max-height: 400px;
+    transition: max-height 0.3s ease;
+}

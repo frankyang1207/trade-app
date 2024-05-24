@@ -1,6 +1,6 @@
 const handleFetch = async (url, headers, method, body, onAction, toast) => {
     try {
-        console.log(headers);
+      
       const response = await fetch(url, { method, headers, body });
       const resObj = await response.json();
   

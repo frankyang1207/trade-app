@@ -1,32 +1,28 @@
-import React, {useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Heading, VStack } from "@chakra-ui/react";
+import { useDispatch } from 'react-redux';
+import { addToCart, getTotals } from '../features/cartSlice';
 import Card from "./card";
+import { useGetAllProductsQuery } from '../features/productsApi';
 
-const ProductsSection = ({ refreshSwitch, onUpdateProduct }) => {
-  const [products, setProducts] = useState([]);
-  const [isFetching, setIsFetching] = useState(true);
+const ProductsSection = ({ refreshSwitch, reRenderProducts, changePage }) => {
+  const dispatch = useDispatch();
+  // const imageSrc = "../images/cardboard-box-taped-up.jpg"
+  const { data, refetch  } = useGetAllProductsQuery();
 
-  const imageSrc = "../images/cardboard-box-taped-up.jpg"
+  const handleAddToCart = (product) => {
+    dispatch(addToCart(product));
+    dispatch(getTotals());
+  }
 
   useEffect(() => {
-    const fetchData = async () => { 
-      try {
-        const headers = { 'Content-Type': 'application/json' };
-        const method = 'GET';
-        const response = await fetch('http://localhost:9000/products', {method, headers});
-        const resObj = await response.json();
-        console.log(resObj)
-        if (response.ok) {
-          setProducts(resObj);
-        } else {
-          console.log(response.error);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-      fetchData();
-  }, [refreshSwitch]);
+    refetch();
+  }, [refreshSwitch, refetch]);
+
+  useEffect(() => {
+    localStorage.removeItem('product');
+  }, []);
+
 
  
   return (
@@ -47,16 +43,13 @@ const ProductsSection = ({ refreshSwitch, onUpdateProduct }) => {
           gridTemplateColumns="repeat(3,minmax(0,1fr))"
           gridGap={8}
         >
-          {products && products.map((product) => (
+          {data?.map((product) => (
             <Card
               key={product.product_id}
-              id={product.product_id}
-              owner={product.product_owner}
-              name={product.product_name}
-              price={product.product_price}
-              description={product.product_description}
-              imageSrc={imageSrc}
-              onCardChange={onUpdateProduct}
+              product={product}
+              reRenderProducts={reRenderProducts}
+              addToCart={handleAddToCart}
+              changePage={changePage}
             />
           ))}
         </Box>
