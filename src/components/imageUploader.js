@@ -86,7 +86,7 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
 
     try {
       // getting signed URL
-      const response = await fetch('https://trade-app-api-ptxs.onrender.com//s3_signed_url', {
+      const response = await fetch('https://trade-app-api-ptxs.onrender.com/s3_signed_url', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
