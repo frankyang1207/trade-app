@@ -90,7 +90,7 @@ const ProfileForm = ({ changePage }) => {
       'user_id': userId
     });
     try {
-      const response = await fetch('http://localhost:9000/user', { method, headers, body });
+      const response = await fetch('https://trade-app-api-ptxs.onrender.com//user', { method, headers, body });
       const resObj = await response.json();
       if (response.ok) {
         toast({

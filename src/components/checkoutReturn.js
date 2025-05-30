@@ -11,7 +11,7 @@ const CheckoutReturn = ({changePage}) => {
 
   useEffect(() => {
     const sessionId = localStorage.getItem('session-id');
-    fetch(`http://localhost:9000/session-status?session_id=${sessionId}`)
+    fetch(`https://trade-app-api-ptxs.onrender.com//session-status?session_id=${sessionId}`)
       .then((res) => res.json())
       .then((data) => {
         console.log(data);

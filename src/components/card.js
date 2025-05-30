@@ -28,7 +28,7 @@ const Card = (props) => {
    // handle product removal
   const handleRemoval = async (e) => {
     e.stopPropagation();
-    const url = 'http://localhost:9000/product';
+    const url = 'https://trade-app-api-ptxs.onrender.com//product';
     const headers = { 'Authorization': 'Bearer ' + accessToken  };
     const data = ({ 'product_id': product.product_id });
     try {

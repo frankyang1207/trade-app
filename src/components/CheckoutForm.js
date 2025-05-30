@@ -27,7 +27,7 @@ const CheckoutForm = ({changePage}) => {
   
   const fetchClientSecret = useCallback(() => {
     // Create a Checkout Session
-    return fetch("http://localhost:9000/create-checkout-session", {
+    return fetch("https://trade-app-api-ptxs.onrender.com//create-checkout-session", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({cartItems:cart.cartItems, userId: userId,})

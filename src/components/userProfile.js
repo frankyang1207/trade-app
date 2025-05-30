@@ -60,7 +60,7 @@ const UserProfile = ({ changePage }) => {
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken };
     const method = 'GET';
     try {
-      const response = await fetch(`http://localhost:9000/user/${userId}`, {method, headers});
+      const response = await fetch(`https://trade-app-api-ptxs.onrender.com//user/${userId}`, {method, headers});
       if (response.ok) {
         const resObj = await response.json();
         setUserInfo({

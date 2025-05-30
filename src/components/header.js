@@ -46,7 +46,7 @@ const Header = ({ changePage, setLoginModalOpen, setRegisterModalOpen, setPostMo
   
   // handle log out
   const logout = async () => {
-    const url = 'http://localhost:9000/logout';
+    const url = 'https://trade-app-api-ptxs.onrender.com//logout';
     const headers = { 'Content-Type': 'application/json' };
     const method = 'DELETE';
     const body = JSON.stringify({ 'token': refreshToken });
