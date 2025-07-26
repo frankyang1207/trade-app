@@ -4,7 +4,7 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout
 } from '@stripe/react-stripe-js';
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { useAuthContext } from '../context/authContext';
 
 const stripePromise = loadStripe("pk_test_51IvlrEKiKjECHoUbZQldbFxix1UFV1QKgPjUGa3DrvMbMLgMCVhiyMALR3yXMicX92vCn1BCbiAg9REskTBrWdhj00mpyAjeos");
@@ -27,8 +27,8 @@ const CheckoutForm = ({changePage}) => {
   
   const fetchClientSecret = useCallback(() => {
     // Create a Checkout Session
-    return fetch("https://trade-app-api-ptxs.onrender.com/create-checkout-session", {
-      method: "POST",
+    return fetch(process.env.REACT_APP_API + '/create-checkout-session', {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({cartItems:cart.cartItems, userId: userId,})
     })

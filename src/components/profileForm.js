@@ -52,10 +52,13 @@ const ProfileForm = ({ changePage }) => {
       phoneNumber: localFormData && localFormData.phoneNumber ? localFormData.phoneNumber : '',
       postalCode: localFormData && localFormData.postalCode ? localFormData.postalCode : '',
       email: localFormData && localFormData.email ? localFormData.email : '',
+      country: localFormData && localFormData.country ? localFormData.country : '',
+      province: localFormData && localFormData.province ? localFormData.province : '',
+      city: localFormData && localFormData.city ? localFormData.city : '',
       streetAddress: localFormData && localFormData.streetAddress ? localFormData.streetAddress : '',
     },
-    onSubmit: () => {
-      const res = updateUser();
+    onSubmit: async () => {
+      const res = await updateUser();
       if (res.ok){
         localStorage.removeItem('user-form');
         changePage('userProfilePage');
@@ -84,13 +87,13 @@ const ProfileForm = ({ changePage }) => {
       'user_phone': formik.values.phoneNumber,
       'user_postal_code': formik.values.postalCode,
       'user_street_address': formik.values.streetAddress,
-      'user_country': selectedCountry,
-      'user_province': selectedProvince,
-      'user_city': selectedCity,
+      'user_country': formik.values.country,
+      'user_province': formik.values.province,
+      'user_city': formik.values.city,
       'user_id': userId
     });
     try {
-      const response = await fetch('https://trade-app-api-ptxs.onrender.com/user', { method, headers, body });
+      const response = await fetch(process.env.REACT_APP_API + '/user', { method, headers, body });
       const resObj = await response.json();
       if (response.ok) {
         toast({
@@ -118,79 +121,6 @@ const ProfileForm = ({ changePage }) => {
     }
   }  
   
-  useEffect(() => {
-    fetchCountries();
-  }, [])
-
-
-
-
-  const fetchCountries = async () => {
-    try {
-      const response = await fetch('https://countriesnow.space/api/v0.1/countries/info?returns=name', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch country list');
-      }
-  
-      const responseData = await response.json();
-      setCountries(responseData.data);
-    }
-    catch (error) {
-      console.log(error)
-    }
-  }
-
-  const fetchProvinces = async (country) => {
-    try {
-      const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          "country": country
-        })
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch province list');
-      }
-  
-      const responseData = await response.json();
-      setProvinces(responseData.data.states);
-   
-      }
-    catch (error) {
-      console.log(error)
-    }
-  }
-
-  const fetchCities = async (province) => {
-    try {
-      const response = await fetch('https://countriesnow.space/api/v0.1/countries/state/cities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          "country": selectedCountry,
-          "state": province
-        })
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch province list');
-      }
-      const responseData = await response.json();
-      setCities(responseData.data);
-      }
-    catch (error) {
-      console.log(error)
-    }
-  }
 
   // handle return to user profile page
   const handleReturn = () => {
@@ -254,51 +184,28 @@ const ProfileForm = ({ changePage }) => {
         <Flex>
           <FormControl mt={3} flex='1' mr={2}>
             <FormLabel>Country</FormLabel>
-            <Typeahead
-              id='country-typeahead'
+            <Input
+              type='text'
               placeholder='Enter your country'
-              defaultInputValue={localFormData && localFormData.country ? localFormData.country : ''}
-              onInputChange={(text)=> {
-                setSelectedCountry(text);
-              }}
-              onChange={([selected]) => {
-                if (selected && selected.label) {
-                  setSelectedCountry(selected.label);
-                  fetchProvinces(selected.label);
-                }
-              }}
-              options={[]}
+              {...formik.getFieldProps('country')}
             />
           </FormControl>
 
           <FormControl mt={3} flex='1' ml={2} mr={2}>
             <FormLabel>Province</FormLabel>
-            <Typeahead
-              id='province-typeahead'
+            <Input
+              type='text'
               placeholder='Enter your province'
-              defaultInputValue={localFormData && localFormData.province ? localFormData.province : ''}
-              onChange={([selected]) => {
-                if (selected && selected.label) {
-                  setSelectedProvince(selected.label);
-                  fetchCities(selected.label);
-                }
-              }}
-              options={provinces && provinces.map(province => ({ label: province.name }))}
+              {...formik.getFieldProps('province')}
             />
           </FormControl>
 
           <FormControl mt={3} flex='1' ml={2}>
             <FormLabel>City</FormLabel>
-            <Typeahead
-              id='city-typeahead'
+            <Input
+              type='text'
               placeholder='Enter your city'
-              defaultInputValue={localFormData && localFormData.city ? localFormData.city : ''}
-              onChange={([selected]) => {
-                  if (selected) {
-                  setSelectedCity(selected);
-                }
-              }}
-              options={cities}
+              {...formik.getFieldProps('city')}
             />
           </FormControl>
         </Flex>

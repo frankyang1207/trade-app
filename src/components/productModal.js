@@ -89,7 +89,7 @@ const ProductModal = ({
 
   // fetch for post product
   const postProduct = async () => {
-    const url = 'https://trade-app-api-ptxs.onrender.com/product';
+    const url = process.env.REACT_APP_API + '/product';
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken };
     const body = JSON.stringify({ 
       'product_image_link': productImage.url,
@@ -138,7 +138,7 @@ const ProductModal = ({
       'product_for_male': isForMale,
       'product_for_female': isForFemale,
     });
-    await handleFetch('https://trade-app-api-ptxs.onrender.com/product', headers, 'PUT', body, onAction, toast);
+    await handleFetch(process.env.REACT_APP_API + '/product', headers, 'PUT', body, onAction, toast);
   };
 
   return (

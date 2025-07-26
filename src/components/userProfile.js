@@ -13,8 +13,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faEnvelope, faLocationDot } from '@fortawesome/free-solid-svg-icons'
 import { useAuthContext } from '../context/authContext';
 
-const logo = require('../images/logo-Placeholder.jpg');
-
 
 const UserProfile = ({ changePage }) => {
   const { isLoggedin, userId, onLogin, accessToken } = useAuthContext();
@@ -36,6 +34,8 @@ const UserProfile = ({ changePage }) => {
 
   const datetimeParts = userInfo.datetimeCreated.split('T');
   const dateCreated = datetimeParts[0]
+  const [formattedAddress, setFormattedAddress] = useState('');
+  
 
   useEffect(() => {
     fetchData();
@@ -60,7 +60,7 @@ const UserProfile = ({ changePage }) => {
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken };
     const method = 'GET';
     try {
-      const response = await fetch(`https://trade-app-api-ptxs.onrender.com/user/${userId}`, {method, headers});
+      const response = await fetch(process.env.REACT_APP_API + `/user/${userId}`, {method, headers});
       if (response.ok) {
         const resObj = await response.json();
         setUserInfo({
@@ -77,6 +77,16 @@ const UserProfile = ({ changePage }) => {
           streetAddress: resObj.user_street_address,
           datetimeCreated: resObj.user_created_datetime 
         })
+
+      
+      // address parts that can be combined into one line with comma seperate them
+      let addressParts = [];
+      if (resObj.user_city) addressParts.push(resObj.user_city);
+      if (resObj.user_province) addressParts.push(resObj.user_province);
+      if (resObj.user_postal_code) addressParts.push(resObj.user_postal_code);
+      if (resObj.user_country) addressParts.push(resObj.user_country);
+      const strAddress = addressParts.join(', ')
+      setFormattedAddress(strAddress);
       }
     }
     catch (error) {
@@ -112,11 +122,7 @@ const UserProfile = ({ changePage }) => {
             </Text>
             <Text>
               <FontAwesomeIcon color='teal' icon={ faLocationDot }/> 
-              
-              {userInfo.city ? ' ' + userInfo.city : ''}
-              {userInfo.province ? ', ' + userInfo.province + ',' : ''}
-              {' ' + userInfo.postalCode}
-              {userInfo.country ? ', ' + userInfo.country : ''}
+              {' '+ formattedAddress}
             </Text>
           </Box>
         </VStack>
