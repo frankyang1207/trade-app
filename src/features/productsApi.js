@@ -5,7 +5,7 @@ export const productsApi = createApi({
     baseQuery: fetchBaseQuery({ baseUrl: process.env.REACT_APP_API + '/' }),
     endpoints: (builder) => ({
         getAllProducts: builder.query({
-            query: () => 'products',
+            query: () => '/api/v1/products',
         }),
     })
 

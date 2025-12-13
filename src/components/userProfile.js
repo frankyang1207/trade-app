@@ -60,7 +60,7 @@ const UserProfile = ({ changePage }) => {
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken };
     const method = 'GET';
     try {
-      const response = await fetch(process.env.REACT_APP_API + `/user/${userId}`, {method, headers});
+      const response = await fetch(process.env.REACT_APP_API + `/api/v1/user/${userId}`, {method, headers});
       if (response.ok) {
         const resObj = await response.json();
         setUserInfo({

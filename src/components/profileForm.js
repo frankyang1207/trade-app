@@ -93,7 +93,7 @@ const ProfileForm = ({ changePage }) => {
       'user_id': userId
     });
     try {
-      const response = await fetch(process.env.REACT_APP_API + '/user', { method, headers, body });
+      const response = await fetch(process.env.REACT_APP_API + `/api/v1/user/${userId}`, { method, headers, body });
       const resObj = await response.json();
       if (response.ok) {
         toast({

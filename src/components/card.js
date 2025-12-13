@@ -28,11 +28,10 @@ const Card = (props) => {
    // handle product removal
   const handleRemoval = async (e) => {
     e.stopPropagation();
-    const url = process.env.REACT_APP_API + '/product';
+    const url = process.env.REACT_APP_API + `/api/v1/product/${product.product_id}`;
     const headers = { 'Authorization': 'Bearer ' + accessToken  };
-    const data = ({ 'product_id': product.product_id });
     try {
-      const response = await axios.delete(url, {headers, data});
+      const response = await axios.delete(url, {headers});
       if (response && response.status && response.status === 200) {
         toast({
           title: 'Success',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '../supabaseClient';
 
 const thumbsContainer = {
     display: 'flex',
@@ -77,65 +78,55 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
     }
   });
 
-  // upload image file to AWS S3 bucket
+ // upload image file to Supabase Storage
   const handleImage = async (file) => {
+    console.log('123');
     let dir_name = dirName;
     let fileParts = file.name.split('.');
     let fileName = `${dir_name}/${uuidv4()}-${fileParts[0]}.${fileParts[1]}`;
-    let fileType = fileParts[1];
 
     try {
-      // getting signed URL
-      const response = await fetch(process.env.REACT_APP_API + '/s3_signed_url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ fileName, fileType }),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to get signed URL');
-      }
-  
-      const responseData = await response.json();
+      // upload to Supabase Storage
+      const { error } = await supabase.storage
+        .from('trade-app-images') 
+        .upload(fileName, file, {
+          contentType: file.type, 
+          upsert: false,
+        });
 
-      let signedRequest = responseData.signedRequest;
-      let url = responseData.url;
-  
-      try {
-        // upload image using signed URL
-        const response = await fetch(signedRequest, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': fileType,
-          },
-          body: file,
-        })
-        if (response.status === 200) {
-          setImage({
-            file: file,
-            preview: URL.createObjectURL(file),
-            url:url
-          })
-        }
-      } catch (error) {
+      if (error) {
         console.log(error);
-        return {
-          success: false,
-          error: error.message,
-        };
+        return { success: false, error: error.message };
       }
+
+      // get public URL
+      const { data } = supabase.storage
+        .from('trade-app-images')
+        .getPublicUrl(fileName);
+      // const url = data.publicUrl;
+      console.log('fileName:', fileName);
+      console.log('getPublicUrl data:', data);
+      const url = data?.publicUrl || data?.publicURL;
+      console.log('final url:', url);
+
+      // update image state
+      setImage({
+        file: file,
+        preview: URL.createObjectURL(file),
+        url: url,
+      });
+    
+      return { success: true, url };
     } catch (error) {
       console.log(error);
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
   };
 
   const deleteImage = () => {
-    URL.revokeObjectURL(image.preview);
+    if (image.preview){
+      URL.revokeObjectURL(image.preview);
+    }
     setImage({ file: undefined, preview: '', url: '' });
   }
 
@@ -149,6 +140,7 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
           style={img}
           // Revoke data uri after image is loaded
           onLoad={() => { URL.revokeObjectURL(image.preview) }}
+          alt="preview"
         />
         
       </div>

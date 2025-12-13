@@ -46,7 +46,7 @@ const Header = ({ changePage, setLoginModalOpen, setRegisterModalOpen, setPostMo
   
   // handle log out
   const logout = async () => {
-    const url = process.env.REACT_APP_API + '/logout';
+    const url = process.env.REACT_APP_API + '/api/v1/auth/logout';
     const headers = { 'Content-Type': 'application/json' };
     const method = 'DELETE';
     const body = JSON.stringify({ 'token': refreshToken });

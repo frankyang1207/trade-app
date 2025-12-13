@@ -106,7 +106,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
       'user_email': formik.values.email, 
       'user_password': formik.values.password 
     });
-    await handleFetch(process.env.REACT_APP_API + '/login', 'POST', headers, body);
+    await handleFetch(process.env.REACT_APP_API + '/api/v1/auth/login', 'POST', headers, body);
   };
 
   // fetch for register
@@ -120,7 +120,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
       'user_phone': formik.values.phoneNumber,
       'user_postal_code': formik.values.postalCode,
     });
-    await handleFetch(process.env.REACT_APP_API + '/user', 'POST', headers, body);
+    await handleFetch(process.env.REACT_APP_API + '/api/v1/user', 'POST', headers, body);
   };
 
   const handleSwitchMode = (mode) => {
