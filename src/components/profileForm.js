@@ -14,6 +14,8 @@ import {
   useToast, 
 } from '@chakra-ui/react';
 
+import { supabase } from '../supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import '../../node_modules/react-bootstrap-typeahead/css/Typeahead.css';
@@ -23,20 +25,14 @@ import './app.css';
 import { useAuthContext } from '../context/authContext';
 import FileUploader from './imageUploader';
 
-
+// User profile page component that allows users to update account information
 const ProfileForm = ({ changePage }) => {
-  // get user data from profile page through local storage
+  // Get user data from profile page through local storage
   const userFormString = localStorage.getItem('user-form');
-  const localFormData = JSON.parse(userFormString);
-  const toast = useToast();
+  const localFormData = userFormString ? JSON.parse(userFormString) : null;
 
+  const toast = useToast();
   const { userId, accessToken } = useAuthContext();
-  const [countries, setCountries] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(localFormData && localFormData.country ? localFormData.country : '');
-  const [provinces, setProvinces] = useState([]);
-  const [selectedProvince, setSelectedProvince] = useState(localFormData && localFormData.province ? localFormData.province : '');
-  const [cities, setCities] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(localFormData && localFormData.city ? localFormData.city : '');
   const [avatarImage, setAvatarImage] = useState({ 
     file: undefined,
     preview: localFormData && localFormData.imageLink ? localFormData.imageLink : '',
@@ -58,12 +54,20 @@ const ProfileForm = ({ changePage }) => {
       streetAddress: localFormData && localFormData.streetAddress ? localFormData.streetAddress : '',
     },
     onSubmit: async () => {
-      const res = await updateUser();
-      if (res.ok){
-        localStorage.removeItem('user-form');
-        changePage('userProfilePage');
+      try {
+        // Upload avatar image to Supabase
+        const avatarUrl = await uploadAvatarIfNeeded();
+    
+        const res = await updateUser(avatarUrl);
+        if (res?.ok){
+          localStorage.removeItem('user-form');
+          changePage('userProfilePage');
+        }
+      } catch (e) {
+        console.log(e)
       }
-      },
+      
+    },
 
     validationSchema: Yup.object({
       email: Yup.string().email('Invalid email address').required('Required'),
@@ -75,12 +79,34 @@ const ProfileForm = ({ changePage }) => {
     })
   });
 
+  // Helper function for upload user avatar image
+  const uploadAvatarIfNeeded = async () => {
+    if (!avatarImage.file) return avatarImage.url || '';
 
-  const updateUser = async () => {
+    const file = avatarImage.file;
+    const parts = file.name.split('.');
+    const ext = parts[parts.length - 1];
+    const base = parts.slice(0, -1).join('.') || 'avatar';
+    const fileName = `user-avatar-images/${uuidv4()}-${base}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from('trade-app-images')
+      .upload(fileName, file, { contentType: file.type, upsert: false });
+
+    if (error) throw new Error(error.message);
+
+    const { data } = supabase.storage
+      .from('trade-app-images')
+      .getPublicUrl(fileName);
+
+    return data?.publicUrl || data?.publicURL || '';
+  };
+
+  const updateUser = async (avatarUrl) => {
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken};
     const method = 'PUT';
     const body = JSON.stringify({
-      'user_image_link': avatarImage.url,
+      'user_image_link': avatarUrl,
       'user_email': formik.values.email, 
       'user_first_name': formik.values.firstName,
       'user_last_name': formik.values.lastName,

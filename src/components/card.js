@@ -4,6 +4,8 @@ import { useAuthContext } from '../context/authContext';
 import ProductModal from "./productModal";
 import axios from "axios";
 
+
+//Reuseable component for handling product cards on landing page
 const Card = (props) => {
   const { product, reRenderProducts, changePage } = props;
   const [isModifyModalOpen, setModifyModalOpen] = useState(false);
@@ -14,45 +16,45 @@ const Card = (props) => {
   }
   const toast = useToast();
   
+  // Save product info and change to product detail page
   const handleDetailPage = () => {
     localStorage.setItem('product', JSON.stringify(product));
     changePage('productDetailPage');
   }
 
   const handleModify = (e) => {
-    // prevent parent event of going to detail page
+    // Prevent parent event of going to product detail page
     e.stopPropagation();
     setModifyModalOpen(true);
   }
 
-   // handle product removal
+   // Remove product from database, only accessable by admin or product owner
   const handleRemoval = async (e) => {
     e.stopPropagation();
     const url = process.env.REACT_APP_API + `/api/v1/product/${product.product_id}`;
     const headers = { 'Authorization': 'Bearer ' + accessToken  };
     try {
       const response = await axios.delete(url, {headers});
-      if (response && response.status && response.status === 200) {
-        toast({
-          title: 'Success',
-          description: response.data.message,
-          status: 'success',
-          position: 'top',
-          duration: 2000,
-          isClosable: true,
-        });
-        reRenderProducts();
-      } else {
-        toast({
+      toast({
+        title: 'Success',
+        description: response.data.message,
+        status: 'success',
+        position: 'top',
+        duration: 2000,
+        isClosable: true,
+      });
+      // Refresh page
+      reRenderProducts();
+      
+    } catch(error) {
+      toast({
           title: 'Failed',
-          description: response.data.message,
+          description:  error.response?.data?.message || 'Failed to remove product',
           status: 'error',
           position: 'top',
           duration: 2000,
           isClosable: true,
         });
-      }
-    } catch(error) {
       console.log(error)
     }
   }

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import "./productDetail.css";
 
+// Product detail page component
 const ProductDetail = () => {
     const [count, setCount] = useState(1);
     const [activeAccordion, setActiveAccordion] = useState(null);
@@ -17,39 +18,29 @@ const ProductDetail = () => {
 
     useEffect(() => {
         dispatch(getTotals());
-    }, [cart, dispatch])
-  
-  
+    }, [cart.cartItems, dispatch])
+    
+    //If product is not found in local memory display the issue
+    if (!product) return <Box mt={150}>Product not found.</Box>;
+    
+
     const handleAddToCart = (cartItem) => {
-        cartItem.add_quantity = count;
-        dispatch(addToCart(cartItem));
+        dispatch(addToCart({...cartItem, add_quantity: count}));
         onOpenCart();
     }
 
-    // if the box is already checked, 2nd click will uncheck it
+    // Toggle check box
     const handleAccordionClick = (id) => {
         setActiveAccordion((prev) => (prev === id ? null : id));
     };
 
-    // set a limit of maximum 999 for add quantity per item
-    const increaseCount = () => {
-        if (count >= 999) {
-          setCount(999);
-        } else {
-          setCount(count+1);
-        }
-    }
+    // Set a limit of maximum 999 for add quantity per item
+    const increaseCount = () => setCount((c) => Math.min(999, c + 1));
 
-    // set a limit of minium 1 for add quantity per item
-    const decreaseCount = () => {
-        if (count <= 1) {
-          setCount(1);
-        } else {
-          setCount(count-1);
-        }
-    }
+    // Set a limit of minium 1 for add quantity per item
+    const decreaseCount = () => setCount((c) => Math.max(1, c - 1));
 
-
+    
 
     return (
         <Box mt={150} mb={75} w='60%' alignSelf={'center'}>

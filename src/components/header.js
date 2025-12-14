@@ -22,7 +22,7 @@ import { useCartContext } from '../context/cartContext';
 import handleFetch from '../utils/handleFetch';
 const logo = require('../images/logo-Placeholder.jpg');
 
-
+// Render Header component
 const Header = ({ changePage, setLoginModalOpen, setRegisterModalOpen, setPostModalOpen }) => {
 
 
@@ -36,7 +36,7 @@ const Header = ({ changePage, setLoginModalOpen, setRegisterModalOpen, setPostMo
   const openPostModal = () => setPostModalOpen(true);
 
 
-  // remove form from local storage during page change
+  // Remove user form from local storage during page change
   const cleanPageChange = (page) => {
     localStorage.removeItem('user-form');
     changePage(page);
@@ -44,13 +44,13 @@ const Header = ({ changePage, setLoginModalOpen, setRegisterModalOpen, setPostMo
 
  
   
-  // handle log out
+  // Log out Handler
   const logout = async () => {
     const url = process.env.REACT_APP_API + '/api/v1/auth/logout';
     const headers = { 'Content-Type': 'application/json' };
     const method = 'DELETE';
     const body = JSON.stringify({ 'token': refreshToken });
-    handleFetch(url, headers, method, body, onLogout, toast);
+    await handleFetch(url, headers, method, body, onLogout, toast);
     localStorage.removeItem('user-form');
     changePage('landingPage');
   }

@@ -1,9 +1,11 @@
 import {createContext, useContext, useState} from 'react';
 
+// AuthContext to manage user authentication state globally
 const AuthContext = createContext(undefined);
 
-// if user refresh page, state would be lost, to stay login local memory is used
+// If user refresh page, state would be lost, to stay login local memory is used
 export const AuthProvider = ({ children }) => {
+  
   const localUserData = localStorage.getItem('user-info') ? JSON.parse(localStorage.getItem('user-info')) : ''
   const [state, setState] = useState({
     isLoggedin: localUserData && localUserData.userId ? true : false,

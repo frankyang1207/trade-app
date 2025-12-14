@@ -23,10 +23,15 @@ import {
 import * as Yup from 'yup';
 import { useAuthContext } from '../context/authContext';
 
-// this component handles the modal for account related actions
+/* 
+Reusable modal component that handles user authentication flows(login & registration) 
+Using Formik for form state and Chakra UI for layout
+Appears when a user attempts to authenticate
+*/
+
 const AuthModal = ({ isOpen, onClose, authMode }) => {
   const toast = useToast();
-  const [mode, setMode] = useState(authMode);
+  const [mode, setMode] = useState(authMode); // login/register
   const [isFetching, setIsFetching] = useState(false);
   const { onLogin } = useAuthContext();
   const formik = useFormik({
@@ -45,7 +50,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
         registerAccount();
       }
     },
-    // postal code is not required during login
+    // Postal code is not required during login
     validationSchema: Yup.object({
       email: Yup.string().email('Invalid email address').required('Required'),
       postalCode: mode === 'login' ? Yup.string() : Yup.string().required('Required'),
@@ -53,7 +58,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
     })
   });
 
-  // fetch helper function
+  // Generic fetch helper for auth-related calls
   const handleFetch = async (url, method, headers, body) => {
     try {
       const response = await fetch(url, { method, headers, body });
@@ -81,9 +86,11 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
           );
           localStorage.setItem('user-info', JSON.stringify(userInfo));
         }
+        // Cleanup
         formik.resetForm();
         onClose();
       } else {
+        // API responded but indicates a failed operation
         toast({
           title: 'Failed',
           description: resObj.error,
@@ -99,7 +106,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
     
   };
 
-  // fetch for login
+  // Login API request
   const loginAccount = async () => {
     const headers = { 'Content-Type': 'application/json' };
     const body = JSON.stringify({ 
@@ -109,7 +116,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
     await handleFetch(process.env.REACT_APP_API + '/api/v1/auth/login', 'POST', headers, body);
   };
 
-  // fetch for register
+  // Registration API request
   const registerAccount = async () => {
     const headers = { 'Content-Type': 'application/json'};
     const body = JSON.stringify({ 
@@ -123,10 +130,10 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
     await handleFetch(process.env.REACT_APP_API + '/api/v1/user', 'POST', headers, body);
   };
 
-  const handleSwitchMode = (mode) => {
-    setMode(mode);
-  }
+  // Switch between login and registration views
+  const handleSwitchMode = (nextMode) => setMode(nextMode);
 
+  // Reset modal mode when closing
   const handleClose = () => {
     setMode(authMode);
     onClose();

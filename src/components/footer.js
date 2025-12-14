@@ -1,6 +1,7 @@
 import React from "react";
 import {Box, Flex} from "@chakra-ui/react";
 
+// Render footer component
 const Footer = () => {
   return (
     <Box backgroundColor="teal.300" style={{ marginTop:"auto" }}>

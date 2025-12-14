@@ -14,27 +14,34 @@ import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { removeFromCart, decreaseCart, addToCart, getTotals } from "../features/cartSlice";
 import { useAuthContext } from '../context/authContext';
 
+
+//Shopping cart page component
 const Cart = ({ changePage, setLoginModalOpen }) => {
     const { isLoggedin } = useAuthContext();
     const cart = useSelector((state) => state.cart);
     const dispatch = useDispatch();
 
+    // Recalculate subtotal/total whenever cart changes
     useEffect(() => {
         dispatch(getTotals());
     }, [cart, dispatch])
 
+    // Remove an item completely from the cart
     const handleRemoveFromCart = (cartItem) => {
         dispatch(removeFromCart(cartItem));
     }
 
+    // Decrease quantity by 1
     const handleDecreaseCart = (cartItem) => {
         dispatch(decreaseCart(cartItem));
     }
 
+    // Increase quantity by 1
     const handleIncreaseCart = (cartItem) => {
         dispatch(addToCart(cartItem));
     }
 
+    // Open auth modal when user tries to checkout while logged out
     const openLoginModal = () => setLoginModalOpen(true);
 
     return (

@@ -22,10 +22,9 @@ import ProductModal from './components/productModal';
 import CheckoutForm from './components/CheckoutForm';
 import CheckoutReturn from './components/checkoutReturn';
 
-
+// Register redux store
 const store = configureStore({
   reducer: {
-    // products: productsReducer,
     cart: cartReducer,
     [productsApi.reducerPath]: productsApi.reducer, 
   },
@@ -33,23 +32,24 @@ const store = configureStore({
     getDefaultMiddleware().concat(productsApi.middleware)
 })
 
-// store.dispatch(productsFetch());
 store.dispatch(getTotals())
 
+// Main app component that controls different page and modal views
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
-  //  rerender product component when product section changed
+  //  Rerender product component when product section changed
   const [refreshProductSection, setRefreshProductSection] = useState(false);
   const [currentPage, setCurrentPage] = useState('landingPage');
   const [isLoginModalOpen, setLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setRegisterModalOpen] = useState(false);
   const [isPostModalOpen, setPostModalOpen] = useState(false)
 
+  // State to refresh list of products
   const reRenderProducts = () => {
     setRefreshProductSection(prevState => !prevState);
   };
 
-  // render the component based on currentPage string
+  // Render the component based on currentPage string
   const renderSwitch = (page) => {
     switch (page) {
       case 'userProfilePage':
@@ -73,13 +73,15 @@ function App() {
     }
   }
 
+  // Toggle for side cart
   const toggleCart = () => {
     setIsCartOpen(!isCartOpen);
   };
 
+  // Toggle for product upload modal
   const closePostModal = () => {
     setPostModalOpen(false); 
-    // update app.js and its children
+    // Update app.js and its children
     reRenderProducts();
   }
 

@@ -5,6 +5,7 @@ import { addToCart, getTotals } from '../features/cartSlice';
 import Card from "./card";
 import { useGetAllProductsQuery } from '../features/productsApi';
 
+// Component for rendering product cards
 const ProductsSection = ({ refreshSwitch, reRenderProducts, changePage }) => {
   const dispatch = useDispatch();
   // const imageSrc = "../images/cardboard-box-taped-up.jpg"

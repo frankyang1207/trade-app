@@ -6,14 +6,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { removeFromCart, decreaseCart, addToCart, getTotals } from "../features/cartSlice";
 import { useCartContext } from '../context/cartContext';
 
+// Side cart component
 const SideCart = ({ changePage }) => {
-  const { onOpenCart, onCloseCart, state } = useCartContext();
+  const { onCloseCart, state } = useCartContext();
   const cart = useSelector((state) => state.cart);
   const dispatch = useDispatch();
 
   useEffect(() => {
       dispatch(getTotals());
-  }, [cart, dispatch])
+  }, [cart.cartItems, dispatch])
 
   const handleRemoveFromCart = (cartItem) => {
       dispatch(removeFromCart(cartItem));

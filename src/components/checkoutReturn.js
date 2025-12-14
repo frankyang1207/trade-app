@@ -5,12 +5,14 @@ import { HStack } from "@chakra-ui/react";
 import { useDispatch } from "react-redux";
 import { clearCart } from "../features/cartSlice";
 
+// Checkout return page component
 const CheckoutReturn = ({changePage}) => {
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState(null); // 'open'|'complete'
   const dispatch = useDispatch();
 
   useEffect(() => {
     const sessionId = localStorage.getItem('session-id');
+    if (!sessionId) return;
     fetch(process.env.REACT_APP_API + `/session-status?session_id=${sessionId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -23,25 +25,27 @@ const CheckoutReturn = ({changePage}) => {
   }, []);
 
   useEffect(() => {
+    // Redirect to checkout form page
     if (status === 'open') {
       changePage('checkoutFormPage');
     }
+    // Clear Redux cart and remove cart items and Stripe session ID from local memory
     if (status === 'complete') {
       localStorage.removeItem('cartItems');
+      localStorage.removeItem('session-id');
       dispatch(clearCart());
     }
   }, [status, dispatch, changePage]);
 
 
   if (status === 'complete') {
-    localStorage.removeItem('cartItems');
     return (
       <section style={{marginTop:'160px'}}>
         <h1 style={{fontSize:'56px'}}>
           Thank you.
         </h1>
         <h3>
-          You order was completed successfully.
+          Your order was completed successfully.
         </h3>
         <HStack w='600px' alignContent='center' m='60px auto 30px' spacing={8}>
         <FontAwesomeIcon 
@@ -63,7 +67,6 @@ const CheckoutReturn = ({changePage}) => {
       </section>
     )
   }
-
   return null;
 }
 export default CheckoutReturn;

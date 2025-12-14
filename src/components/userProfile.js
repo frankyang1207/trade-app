@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faEnvelope, faLocationDot } from '@fortawesome/free-solid-svg-icons'
 import { useAuthContext } from '../context/authContext';
 
-
+// User profile component
 const UserProfile = ({ changePage }) => {
   const { isLoggedin, userId, onLogin, accessToken } = useAuthContext();
 

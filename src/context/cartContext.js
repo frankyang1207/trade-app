@@ -1,8 +1,8 @@
 import {createContext, useContext, useState} from 'react';
 
+// CartContext to manage shopping cart's visibility
 const CartContext = createContext(undefined);
 
-// if user refresh page, state would be lost, to stay login local memory is used
 export const CartProvider = ({ children }) => {
   const productData = localStorage.getItem('product') ? JSON.parse(localStorage.getItem('product')) : '';
   const [state, setState] = useState({

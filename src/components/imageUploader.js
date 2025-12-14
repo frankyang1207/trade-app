@@ -4,59 +4,63 @@ import { v4 as uuidv4 } from 'uuid';
 import { supabase } from '../supabaseClient';
 
 const thumbsContainer = {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 16
-  };
+  display: 'flex',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  marginTop: 16
+};
   
-  const thumb = {
-    display: 'inline-flex',
-    borderRadius: 2,
-    border: '1px solid #eaeaea',
-    marginBottom: 8,
-    marginRight: 8,
-    width: 100,
-    height: 100,
-    padding: 4,
-    boxSizing: 'border-box'
-  };
-  
-  const thumbInner = {
-    position: 'relative'
-  };
-  
-  const img = {
-    display: 'block',
-    width: '100px',
-    height: '100%'
-  };
-  
-  const dropzone = {
-    marginTop: '10px',
-    width: '100%',
-    height: '200px',
-    boarderRadius: '5px',
-    boarder: '2px dashed #0086fe',
-    color: '#0086fe',
-    background: '#f4f3f9',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center'
-  };
-  
-  const removeIcon = {
-    position: 'absolute',
-    top: '-12px',
-    right: '3px',
-    fontSize: '30px',
-    cursor: 'pointer',
-  };
+const thumb = {
+  display: 'inline-flex',
+  borderRadius: 2,
+  border: '1px solid #eaeaea',
+  marginBottom: 8,
+  marginRight: 8,
+  width: 100,
+  height: 100,
+  padding: 4,
+  boxSizing: 'border-box'
+};
+
+const thumbInner = {
+  position: 'relative'
+};
+
+const img = {
+  display: 'block',
+  width: '100px',
+  height: '100%'
+};
+
+const dropzone = {
+  marginTop: '10px',
+  width: '100%',
+  height: '200px',
+  borderRadius: '5px',
+  border: '2px dashed #0086fe',
+  color: '#0086fe',
+  background: '#f4f3f9',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center'
+};
+
+const removeIcon = {
+  position: 'absolute',
+  top: '-12px',
+  right: '3px',
+  fontSize: '30px',
+  cursor: 'pointer',
+};
+
+const revokeIfBlob = (url) => {
+  if (url?.startsWith('blob:')) URL.revokeObjectURL(url);
+};
 
 const FileUploader = ({ image, setImage, dirName, imageType }) => {
   const [isDisabled, setIsDisabled] = useState(false);
 
-  // disable the file uploader when it already has an image
+  // Disable the file uploader when it already has an image
   useEffect(() => {
     if (image.preview) {
       setIsDisabled(true);
@@ -65,7 +69,7 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
       setIsDisabled(false);
     }
     
-  }, [image]);
+  }, [image.preview]);
 
   const {getRootProps, getInputProps} = useDropzone({
     accept: {
@@ -74,63 +78,69 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
     disabled: isDisabled,
     maxFiles: 1,
     onDrop: acceptedFiles => {
-      handleImage(acceptedFiles[0])
+      if (acceptedFiles?.[0]) handleImage(acceptedFiles[0]);
     }
   });
 
- // upload image file to Supabase Storage
+ // Upload image file to Supabase Storage
   const handleImage = async (file) => {
-    console.log('123');
     let dir_name = dirName;
     let fileParts = file.name.split('.');
     let fileName = `${dir_name}/${uuidv4()}-${fileParts[0]}.${fileParts[1]}`;
 
-    try {
-      // upload to Supabase Storage
-      const { error } = await supabase.storage
-        .from('trade-app-images') 
-        .upload(fileName, file, {
-          contentType: file.type, 
-          upsert: false,
-        });
+    // Create preview first
+    const blobPreview = URL.createObjectURL(file);
 
-      if (error) {
-        console.log(error);
-        return { success: false, error: error.message };
-      }
+    // Revoke old blob preview
+    setImage((prev) => {
+      revokeIfBlob(prev.preview);
+      return {
+        file,
+        preview: blobPreview,
+        url: prev.url || '',  
+      };
+    });
 
-      // get public URL
-      const { data } = supabase.storage
-        .from('trade-app-images')
-        .getPublicUrl(fileName);
-      // const url = data.publicUrl;
-      console.log('fileName:', fileName);
-      console.log('getPublicUrl data:', data);
-      const url = data?.publicUrl || data?.publicURL;
-      console.log('final url:', url);
+    // try {
+    //   // Upload to Supabase Storage
+    //   const { error } = await supabase.storage
+    //     .from('trade-app-images') 
+    //     .upload(fileName, file, {
+    //       contentType: file.type, 
+    //       upsert: false,
+    //     });
 
-      // update image state
-      setImage({
-        file: file,
-        preview: URL.createObjectURL(file),
-        url: url,
-      });
+    //   if (error) {
+    //     console.log(error);
+    //     return { success: false, error: error.message };
+    //   }
+
+    //   // Get public URL
+    //   const { data } = supabase.storage
+    //     .from('trade-app-images')
+    //     .getPublicUrl(fileName);
+    //   const url = data?.publicUrl || data?.publicURL;
+
+    //   // Update image state
+    //   setImage({
+    //     file: file,
+    //     preview: URL.createObjectURL(file),
+    //     url: url,
+    //   });
     
-      return { success: true, url };
-    } catch (error) {
-      console.log(error);
-      return { success: false, error: error.message };
-    }
+    //   return { success: true, url };
+    // } catch (error) {
+    //   console.log(error);
+    //   return { success: false, error: error.message };
+    // }
   };
 
   const deleteImage = () => {
-    if (image.preview){
-      URL.revokeObjectURL(image.preview);
-    }
+    revokeIfBlob(image.preview);
     setImage({ file: undefined, preview: '', url: '' });
   }
 
-  // display preview image
+  // Display preview image
   const thumbs = (
     <div style={thumb} key={image.preview}>
       <div className='thumb-inner' style={thumbInner}>
@@ -139,7 +149,7 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
           src={image.preview}
           style={img}
           // Revoke data uri after image is loaded
-          onLoad={() => { URL.revokeObjectURL(image.preview) }}
+          // onLoad={() => { URL.revokeObjectURL(image.preview) }}
           alt="preview"
         />
         

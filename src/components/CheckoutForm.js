@@ -7,8 +7,12 @@ import {
 import { useSelector } from "react-redux";
 import { useAuthContext } from '../context/authContext';
 
-const stripePromise = loadStripe("pk_test_51IvlrEKiKjECHoUbZQldbFxix1UFV1QKgPjUGa3DrvMbMLgMCVhiyMALR3yXMicX92vCn1BCbiAg9REskTBrWdhj00mpyAjeos");
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
+/*
+Checkout form component
+Using Stripe for the payment handling
+*/
 const CheckoutForm = ({changePage}) => {
   const cart = useSelector((state) => state.cart);
   
@@ -16,28 +20,34 @@ const CheckoutForm = ({changePage}) => {
   const [isComplete, setIsComplete] = useState(false);
   const [response, setResponse] = useState('');
 
+  // redirect to return page once checkout transaction completes
   const handleComplete = () => {
     setIsComplete(true);
     changePage('checkoutReturnPage');
   }
-
-  useEffect(() => {
-    localStorage.setItem('session-id', response.sessionId);
-  }, [response])
   
-  const fetchClientSecret = useCallback(() => {
-    // Create a Checkout Session
-    return fetch(process.env.REACT_APP_API + '/create-checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({cartItems:cart.cartItems, userId: userId,})
-    })
-      .then((res) => res.json())
-      .then((data) => { 
-        setResponse(data);
-        return data.clientSecret; 
+  const fetchClientSecret = useCallback(async () => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API}/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ cartItems: cart.cartItems, userId }),
       });
-  }, []);
+
+      if (!res.ok) throw new Error('Failed to create checkout session');
+
+      const data = await res.json();
+      setResponse(data);
+
+      // Store Stripe session ID for return page
+      if (data?.sessionId) localStorage.setItem('session-id', data.sessionId);
+
+      return data.clientSecret;
+    } catch (error) {
+      console.log(error);
+      throw error; 
+    }
+  }, [cart.cartItems, userId]);
 
   const options = {fetchClientSecret};
 
