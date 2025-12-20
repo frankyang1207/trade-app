@@ -1,6 +1,7 @@
 import React, {useState, useEffect } from 'react';
 import { 
   Box,
+  Stack,
   HStack,
   VStack,
   Button,
@@ -12,6 +13,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPhone, faEnvelope, faLocationDot } from '@fortawesome/free-solid-svg-icons'
 import { useAuthContext } from '../context/authContext';
+import './userProfile.css'
 
 // User profile component
 const UserProfile = ({ changePage }) => {
@@ -104,8 +106,8 @@ const UserProfile = ({ changePage }) => {
       <Heading  as="h1" color='black'>
         User Profile
       </Heading>
-      <HStack w='60%'>
-        <VStack w='40%'>
+      <Stack className='pf-layout' direction="row">
+        <VStack className='pf-left'>
           
           <Avatar w='330px' h='330px' src={
             userInfo && userInfo.imageLink ? userInfo.imageLink  
@@ -127,7 +129,7 @@ const UserProfile = ({ changePage }) => {
           </Box>
         </VStack>
 
-        <VStack w='60%'>
+        <VStack className='pf-right'>
 
           <HStack w='100%'>
             <VStack w='50%'>
@@ -158,7 +160,7 @@ const UserProfile = ({ changePage }) => {
           
       <Button margin='30px 0' colorScheme='teal' variant='solid' onClick={() => handleEdit()} >Edit Profile</Button>
         </VStack>
-      </HStack>
+      </Stack>
     </VStack>
   );
 };

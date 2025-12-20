@@ -1,0 +1,38 @@
+.pf-layout {
+  width: 60%;
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.pf-left {
+  flex: 0 0 40%;
+  align-items: center;
+}
+
+.pf-info {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.pf-right {
+  width: 60%;
+}
+
+@media (max-width: 1000px) {
+  .pf-layout {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .pf-left,
+  .pf-right {
+    width: 100%;
+  }
+
+  .pf-left {
+    align-items: center;
+    text-align: center;
+  }
+
+}

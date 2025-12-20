@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart, getTotals } from '../features/cartSlice';
 import Card from "./card";
 import { useGetAllProductsQuery } from '../features/productsApi';
+import './productSection.css';
 
 // Component for rendering product cards
 const ProductsSection = ({ refreshSwitch, reRenderProducts, changePage }) => {
@@ -39,11 +40,7 @@ const ProductsSection = ({ refreshSwitch, reRenderProducts, changePage }) => {
         <Heading as="h1" color='black'>
           Featured Products
         </Heading>
-        <Box
-          display="grid"
-          gridTemplateColumns="repeat(3,minmax(0,1fr))"
-          gridGap={8}
-        >
+        <div className='products-grid'>
           {data?.map((product) => (
             <Card
               key={product.product_id}
@@ -53,7 +50,7 @@ const ProductsSection = ({ refreshSwitch, reRenderProducts, changePage }) => {
               changePage={changePage}
             />
           ))}
-        </Box>
+        </div>
       </VStack>
     </VStack>
   );

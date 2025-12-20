@@ -29,3 +29,35 @@ li div label {
     max-height: 400px;
     transition: max-height 0.3s ease;
 }
+
+.pd-layout {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.pd-image {
+  flex: 0 0 60%;
+  width: 70%;
+  height: 600px;
+}
+
+.pd-info {
+  width: 30%;;
+}
+
+@media (max-width: 1000px) {
+  .pd-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pd-image {
+    height: auto;
+    width: 100%;
+  }
+
+  .pd-info {
+  width: 100%;;
+}
+}
