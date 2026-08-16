@@ -40,8 +40,11 @@ const CheckoutForm = ({changePage}) => {
       setResponse(data);
 
       // Store Stripe session ID for return page
-      if (data?.sessionId) localStorage.setItem('session-id', data.sessionId);
-
+      if (data?.sessionId) {
+        localStorage.setItem('session-id', data.sessionId);
+        localStorage.setItem('pending-cart', JSON.stringify(cart.cartItems));
+        localStorage.setItem("pending-cart", localStorage.getItem("cartItems"));
+      }
       return data.clientSecret;
     } catch (error) {
       console.log(error);
