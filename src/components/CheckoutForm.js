@@ -16,7 +16,7 @@ Using Stripe for the payment handling
 const CheckoutForm = ({changePage}) => {
   const cart = useSelector((state) => state.cart);
   
-  const { userId } = useAuthContext();
+  const { accessToken } = useAuthContext();
   const [isComplete, setIsComplete] = useState(false);
   const [response, setResponse] = useState('');
 
@@ -30,8 +30,16 @@ const CheckoutForm = ({changePage}) => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API}/create-checkout-session`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cartItems: cart.cartItems, userId }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          cartItems: cart.cartItems.map(({ product_id, cartQuantity }) => ({
+            product_id,
+            cartQuantity,
+          })),
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to create checkout session');
@@ -42,15 +50,13 @@ const CheckoutForm = ({changePage}) => {
       // Store Stripe session ID for return page
       if (data?.sessionId) {
         localStorage.setItem('session-id', data.sessionId);
-        localStorage.setItem('pending-cart', JSON.stringify(cart.cartItems));
-        localStorage.setItem("pending-cart", localStorage.getItem("cartItems"));
       }
       return data.clientSecret;
     } catch (error) {
       console.log(error);
       throw error; 
     }
-  }, [cart.cartItems, userId]);
+  }, [cart.cartItems, accessToken]);
 
   const options = {fetchClientSecret};
 

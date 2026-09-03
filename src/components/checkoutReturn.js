@@ -18,11 +18,13 @@ const CheckoutReturn = ({ changePage }) => {
     const sessionId = localStorage.getItem("session-id");
     if (!sessionId) return;
 
-    fetch(process.env.REACT_APP_API + `/session-status?session_id=${sessionId}`)
+    fetch(process.env.REACT_APP_API + `/session-status?session_id=${sessionId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
       .then((res) => res.json())
       .then((data) => setStatus(data.status))
       .catch((err) => console.log(err.message));
-  }, []);
+  }, [accessToken]);
 
   // Confirm order in backend (DB insert) AFTER payment complete
   const confirmOrder = async () => {
@@ -30,13 +32,6 @@ const CheckoutReturn = ({ changePage }) => {
     if (!sessionId) throw new Error("Missing session-id");
 
     if (!accessToken) throw new Error("Missing access token");
-
-    // IMPORTANT: use the same cart order as checkout
-    const pendingCartRaw =
-      localStorage.getItem("pending-cart") || localStorage.getItem("cartItems");
-    const pendingCart = pendingCartRaw ? JSON.parse(pendingCartRaw) : [];
-
-    if (!pendingCart.length) throw new Error("Missing pending cart snapshot");
 
     const res = await fetch(process.env.REACT_APP_API + "/api/v1/orders/confirm", {
       method: "POST",
@@ -46,10 +41,6 @@ const CheckoutReturn = ({ changePage }) => {
       },
       body: JSON.stringify({
         sessionId,
-        cartItems: pendingCart.map((i) => ({
-          product_id: i.product_id,
-          cartQuantity: i.cartQuantity,
-        })),
       }),
     });
 
@@ -112,8 +103,8 @@ const CheckoutReturn = ({ changePage }) => {
             <HStack w="600px" alignContent="center" m="60px auto 30px" spacing={8}>
               <FontAwesomeIcon icon={faTruckFast} color="teal" size="3x" />
               <p>
-                An email receipt including the details about your purchase has been
-                been sent to the email address provided. Please keep it for your records.
+                Your payment was successful and your order has been saved. Please keep
+                your Stripe receipt for your records.
               </p>
             </HStack>
             <p
