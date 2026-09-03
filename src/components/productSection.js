@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Heading, VStack } from "@chakra-ui/react";
+import React, { useEffect } from 'react';
+import { Heading, VStack } from "@chakra-ui/react";
 import { useDispatch } from 'react-redux';
 import { addToCart, getTotals } from '../features/cartSlice';
 import Card from "./card";

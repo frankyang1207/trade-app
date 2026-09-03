@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import {loadStripe} from '@stripe/stripe-js';
 import {
   EmbeddedCheckoutProvider,
@@ -18,7 +18,6 @@ const CheckoutForm = ({changePage}) => {
   
   const { accessToken } = useAuthContext();
   const [isComplete, setIsComplete] = useState(false);
-  const [response, setResponse] = useState('');
 
   // redirect to return page once checkout transaction completes
   const handleComplete = () => {
@@ -45,8 +44,6 @@ const CheckoutForm = ({changePage}) => {
       if (!res.ok) throw new Error('Failed to create checkout session');
 
       const data = await res.json();
-      setResponse(data);
-
       // Store Stripe session ID for return page
       if (data?.sessionId) {
         localStorage.setItem('session-id', data.sessionId);

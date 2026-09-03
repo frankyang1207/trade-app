@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTruckFast } from '@fortawesome/free-solid-svg-icons';
 import { HStack } from "@chakra-ui/react";
@@ -27,7 +27,7 @@ const CheckoutReturn = ({ changePage }) => {
   }, [accessToken]);
 
   // Confirm order in backend (DB insert) AFTER payment complete
-  const confirmOrder = async () => {
+  const confirmOrder = useCallback(async () => {
     const sessionId = localStorage.getItem("session-id");
     if (!sessionId) throw new Error("Missing session-id");
 
@@ -47,7 +47,7 @@ const CheckoutReturn = ({ changePage }) => {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || "Order confirmation failed");
     return data; // { success: true, order_id: ... }
-  };
+  }, [accessToken]);
 
   // React to status changes
   useEffect(() => {
@@ -77,7 +77,7 @@ const CheckoutReturn = ({ changePage }) => {
         }
       })();
     }
-  }, [status, dispatch, changePage]); 
+  }, [status, dispatch, changePage, confirmOrder]);
 
   if (status === "complete") {
     return (

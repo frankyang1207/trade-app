@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from 'react';
+import React, {useState, useEffect, useCallback } from 'react';
 import { 
   Box,
   Stack,
@@ -17,7 +17,7 @@ import './userProfile.css'
 
 // User profile component
 const UserProfile = ({ changePage }) => {
-  const { isLoggedin, userId, onLogin, accessToken } = useAuthContext();
+  const { userId, accessToken } = useAuthContext();
 
   const [userInfo, setUserInfo] = useState({
     imageLink: '',
@@ -39,10 +39,6 @@ const UserProfile = ({ changePage }) => {
   const [formattedAddress, setFormattedAddress] = useState('');
   
 
-  useEffect(() => {
-    fetchData();
-  }, [])
-
   // handle the rendering of a section of profile info
   const infoSection = (title, info) => {
     return (
@@ -58,7 +54,7 @@ const UserProfile = ({ changePage }) => {
   }
 
   // fetch for get profile
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken };
     const method = 'GET';
     try {
@@ -94,7 +90,11 @@ const UserProfile = ({ changePage }) => {
     catch (error) {
       console.log(error);
     }
-  }
+  }, [accessToken, userId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleEdit = () => {
     localStorage.setItem('user-form', JSON.stringify(userInfo));

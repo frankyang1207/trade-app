@@ -79,6 +79,7 @@ const ProductModal = ({
       description: Yup.string(),
     })
   });
+  const { setValues } = formik;
 
   // Reset gender checkbox once modal opens, use existing values if it's modifying an product
   useEffect(() => {
@@ -91,13 +92,13 @@ const ProductModal = ({
   useEffect(() => {
     if (!isOpen) return;
     mode === 'modify' &&
-      formik.setValues({
+      setValues({
         name: name ?? '',
         price: price ?? '',
         quantity: quantity ?? '',
         description: description ?? '',
       });
-  }, [isOpen, mode, name, price, quantity, description]);
+  }, [isOpen, mode, name, price, quantity, description, setValues]);
 
   // Reset image uploader status when modal closes
   useEffect(() => {

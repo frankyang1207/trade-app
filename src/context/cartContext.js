@@ -4,7 +4,6 @@ import {createContext, useContext, useState} from 'react';
 const CartContext = createContext(undefined);
 
 export const CartProvider = ({ children }) => {
-  const productData = localStorage.getItem('product') ? JSON.parse(localStorage.getItem('product')) : '';
   const [state, setState] = useState({
      isOpen: false
   });

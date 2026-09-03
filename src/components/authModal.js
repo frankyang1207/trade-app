@@ -1,4 +1,4 @@
-import { useState, useEffect  } from 'react';
+import { useState } from 'react';
 import { useFormik } from 'formik';
 import {
   Button,
@@ -32,7 +32,6 @@ Appears when a user attempts to authenticate
 const AuthModal = ({ isOpen, onClose, authMode }) => {
   const toast = useToast();
   const [mode, setMode] = useState(authMode); // login/register
-  const [isFetching, setIsFetching] = useState(false);
   const { onLogin } = useAuthContext();
   const formik = useFormik({
     initialValues: {
@@ -226,7 +225,7 @@ const AuthModal = ({ isOpen, onClose, authMode }) => {
             </Text>
             }
             <Spacer/>
-            <Button type='submit' colorScheme='teal' isDisabled={isFetching} >Submit</Button>
+            <Button type='submit' colorScheme='teal'>Submit</Button>
           </HStack>
         </ModalFooter>
         </form>

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { v4 as uuidv4 } from 'uuid';
-import { supabase } from '../supabaseClient';
 
 const thumbsContainer = {
   display: 'flex',
@@ -57,7 +55,7 @@ const revokeIfBlob = (url) => {
   if (url?.startsWith('blob:')) URL.revokeObjectURL(url);
 };
 
-const FileUploader = ({ image, setImage, dirName, imageType }) => {
+const FileUploader = ({ image, setImage, imageType }) => {
   const [isDisabled, setIsDisabled] = useState(false);
 
   // Disable the file uploader when it already has an image
@@ -84,10 +82,6 @@ const FileUploader = ({ image, setImage, dirName, imageType }) => {
 
  // Upload image file to Supabase Storage
   const handleImage = async (file) => {
-    let dir_name = dirName;
-    let fileParts = file.name.split('.');
-    let fileName = `${dir_name}/${uuidv4()}-${fileParts[0]}.${fileParts[1]}`;
-
     // Create preview first
     const blobPreview = URL.createObjectURL(file);
 

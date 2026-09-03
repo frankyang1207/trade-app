@@ -1,4 +1,4 @@
-import React, {useState, useEffect } from 'react';
+import React, {useState } from 'react';
 
 import { useFormik } from 'formik';
 import { 
@@ -17,7 +17,6 @@ import {
 import { supabase } from '../supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 import * as Yup from 'yup';
-import { Typeahead } from 'react-bootstrap-typeahead';
 import '../../node_modules/react-bootstrap-typeahead/css/Typeahead.css';
 import '../../node_modules/bootstrap/dist/css/bootstrap.css';
 import './app.css';
